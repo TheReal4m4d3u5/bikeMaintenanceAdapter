@@ -1,4 +1,4 @@
-import { loadAuthToken } from "./authApi";
+import { loadAuthToken } from "../auth/tokenStorage.js";
 
 let onUnauthorized = null;
 

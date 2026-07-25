@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.avery.bikemaintenance.application.exception.DuplicateEmailException;
 import com.avery.bikemaintenance.application.port.outbound.UserAccountRepository;
 import com.avery.bikemaintenance.domain.model.UserAccount;
 import com.avery.bikemaintenance.domain.model.UserRole;
@@ -35,9 +36,7 @@ public class UserAccountService {
                 rawPassword);
 
         if (userAccountRepository.existsByEmail(email)) {
-            throw new IllegalArgumentException(
-                    "An account already exists for email: "
-                            + email);
+            throw new DuplicateEmailException(email);
         }
 
         String userId = generateUserId();

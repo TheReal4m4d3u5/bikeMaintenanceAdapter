@@ -1,43 +1,45 @@
 package com.avery.bikemaintenance.adapter.inbound.rest;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.avery.bikemaintenance.application.service.AuthenticationService;
-import com.avery.bikemaintenance.application.service.JwtService;
+import com.avery.bikemaintenance.application.service.AuthenticationResult;
+import com.avery.bikemaintenance.application.service.LoginService;
 import com.avery.bikemaintenance.application.service.UserAccountService;
 import com.avery.bikemaintenance.domain.model.UserAccount;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.GetMapping;
-
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
 
-    private final UserAccountService userAccountService;
-    private final AuthenticationService authenticationService;
-    private final JwtService jwtService;
+    private final UserAccountService
+            userAccountService;
+
+    private final LoginService loginService;
 
     public AuthenticationController(
             UserAccountService userAccountService,
-            AuthenticationService authenticationService,
-            JwtService jwtService) {
+            LoginService loginService) {
 
-        this.userAccountService = userAccountService;
-        this.authenticationService = authenticationService;
-        this.jwtService = jwtService;
+        this.userAccountService =
+                userAccountService;
+
+        this.loginService =
+                loginService;
     }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public UserAccountResponse register(
-            @RequestBody RegisterUserRequest request) {
+            @RequestBody
+            RegisterUserRequest request) {
 
         UserAccount registeredUser =
                 userAccountService.registerUser(
@@ -48,16 +50,16 @@ public class AuthenticationController {
         return UserAccountResponse.from(
                 registeredUser);
     }
-    
+
     @GetMapping("/me")
     public UserAccountResponse currentUser(
-            @AuthenticationPrincipal Jwt jwt) {
-
-        String userId =
-                jwt.getClaimAsString("userId");
+            @AuthenticationPrincipal
+            Jwt jwt) {
 
         UserAccount currentUser =
-                userAccountService.findById(userId);
+                userAccountService.findById(
+                        jwt.getClaimAsString(
+                                "userId"));
 
         return UserAccountResponse.from(
                 currentUser);
@@ -67,20 +69,16 @@ public class AuthenticationController {
     public LoginResponse login(
             @RequestBody LoginRequest request) {
 
-        UserAccount authenticatedUser =
-                authenticationService.authenticate(
+        AuthenticationResult result =
+                loginService.login(
                         request.email(),
                         request.password());
 
-        String token =
-                jwtService.generateToken(
-                        authenticatedUser);
-
         return new LoginResponse(
-                token,
+                result.token(),
                 "Bearer",
-                jwtService.getExpirationSeconds(),
+                result.expiresInSeconds(),
                 UserAccountResponse.from(
-                        authenticatedUser));
+                        result.userAccount()));
     }
 }

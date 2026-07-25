@@ -22,6 +22,7 @@ import {
 } from "../api/maintenanceIssueApi.js";
 
 import { getTechnicians } from "../api/userAccountApi.js";
+import { getRepositoryProvider } from "../api/repositoryProviderApi.js";
 
 import "../App.css";
 
@@ -55,6 +56,8 @@ const emptyMaintenanceIssue = {
 
 function AdminDashboard() {
     const [bikes, setBikes] = useState([]);
+    const [repositoryProvider, setRepositoryProvider] =
+        useState("memory");
 	const [technicians, setTechnicians] =
 	    useState([]);
 
@@ -65,6 +68,8 @@ function AdminDashboard() {
     const [loading, setLoading] = useState(true);
 
     const [workOrders, setWorkOrders] = useState([]);
+    const [closeConditions, setCloseConditions] =
+        useState({});
     const [workOrderForm, setWorkOrderForm] =
         useState(emptyWorkOrder);
     const [workOrdersLoading, setWorkOrdersLoading] =
@@ -89,6 +94,7 @@ function AdminDashboard() {
 	    loadMaintenanceIssues();
 	    loadWorkOrders();
 	    loadTechnicians();
+        loadRepositoryProvider();
 	}, []);
 
     async function loadBikes() {
@@ -219,6 +225,17 @@ function AdminDashboard() {
 	    }
 	}
 
+    async function loadRepositoryProvider() {
+        try {
+            const selectedProvider =
+                await getRepositoryProvider();
+
+            setRepositoryProvider(selectedProvider);
+        } catch (requestError) {
+            setError(requestError.message);
+        }
+    }
+
     function handleWorkOrderChange(event) {
         const { name, value } = event.target;
 
@@ -278,22 +295,46 @@ function AdminDashboard() {
         try {
             setError("");
 
-            const updatedWorkOrder = await startWork(workOrderId);
+            const updatedWorkOrder =
+                await startWork(workOrderId);
 
             replaceWorkOrder(updatedWorkOrder);
+            await loadBikes();
         } catch (requestError) {
             setError(requestError.message);
         }
+    }
+
+    function handleCloseConditionChange(
+        workOrderId,
+        resultingCondition
+    ) {
+        setCloseConditions((currentConditions) => ({
+            ...currentConditions,
+            [workOrderId]: resultingCondition,
+        }));
     }
 
     async function handleCloseWorkOrder(workOrderId) {
         try {
             setError("");
 
+            const resultingBikeCondition =
+                closeConditions[workOrderId] ??
+                "AVAILABLE";
+
             const updatedWorkOrder =
-                await closeWorkOrder(workOrderId);
+                await closeWorkOrder(
+                    workOrderId,
+                    resultingBikeCondition
+                );
 
             replaceWorkOrder(updatedWorkOrder);
+
+            await Promise.all([
+                loadBikes(),
+                loadMaintenanceIssues(),
+            ]);
         } catch (requestError) {
             setError(requestError.message);
         }
@@ -472,7 +513,12 @@ function AdminDashboard() {
                     </div>
 
                     <div className="repository-badge">
-                        Repository: In Memory
+                        Repository:{" "}
+                        {repositoryProvider === "graphql"
+                            ? "Remote GraphQL"
+                            : repositoryProvider === "sql"
+                                ? "SQL"
+                                : "In Memory"}
                     </div>
                 </div>
             </header>
@@ -1075,18 +1121,51 @@ function AdminDashboard() {
                                                 </button>
                                             )}
 
-                                        {workOrder.status !== "CLOSED" && (
-                                            <button
-                                                className="primary-button"
-                                                type="button"
-                                                onClick={() =>
-                                                    handleCloseWorkOrder(
-                                                        workOrder.workOrderId
-                                                    )
-                                                }
-                                            >
-                                                Close work order
-                                            </button>
+                                        {workOrder.status ===
+                                            "IN_PROGRESS" && (
+                                            <>
+                                                <label className="close-condition-field">
+                                                    Resulting bike condition
+                                                    <select
+                                                        value={
+                                                            closeConditions[
+                                                                workOrder.workOrderId
+                                                            ] ?? "AVAILABLE"
+                                                        }
+                                                        onChange={(event) =>
+                                                            handleCloseConditionChange(
+                                                                workOrder.workOrderId,
+                                                                event.target.value
+                                                            )
+                                                        }
+                                                    >
+                                                        <option value="AVAILABLE">
+                                                            Available
+                                                        </option>
+                                                        <option value="DUE_FOR_SCHEDULED_MAINTENANCE">
+                                                            Due for scheduled maintenance
+                                                        </option>
+                                                        <option value="OUT_OF_SERVICE">
+                                                            Out of service
+                                                        </option>
+                                                        <option value="RETIRED">
+                                                            Retired
+                                                        </option>
+                                                    </select>
+                                                </label>
+
+                                                <button
+                                                    className="primary-button"
+                                                    type="button"
+                                                    onClick={() =>
+                                                        handleCloseWorkOrder(
+                                                            workOrder.workOrderId
+                                                        )
+                                                    }
+                                                >
+                                                    Close work order
+                                                </button>
+                                            </>
                                         )}
                                     </div>
                                 </article>

@@ -1,17 +1,25 @@
 package com.avery.bikemaintenance.domain.model;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 public class WorkOrder {
 
+    private static final Set<String> VALID_STATUSES =
+            Set.of(
+                    "OPEN",
+                    "ASSIGNED",
+                    "IN_PROGRESS",
+                    "CLOSED");
+
     private final String workOrderId;
     private final String bikeId;
-    private String description;
+    private final String maintenanceIssueId;
+    private final String description;
     private String assignedTechnicianId;
     private String status;
     private final LocalDate createdDate;
-    private final String maintenanceIssueId;
-    
+
     public WorkOrder(
             String workOrderId,
             String bikeId,
@@ -21,36 +29,40 @@ public class WorkOrder {
             String status,
             LocalDate createdDate) {
 
-        if (workOrderId == null || workOrderId.isBlank()) {
+        this.workOrderId =
+                requireText(workOrderId, "Work order ID");
+
+        this.bikeId =
+                requireText(bikeId, "Bike ID");
+
+        this.maintenanceIssueId =
+                requireText(
+                        maintenanceIssueId,
+                        "Maintenance issue ID");
+
+        this.description =
+                requireText(description, "Description");
+
+        if (status == null
+                || !VALID_STATUSES.contains(status)) {
+
             throw new IllegalArgumentException(
-                    "Work order ID is required.");
+                    "Invalid work-order status: " + status);
         }
 
-        if (bikeId == null || bikeId.isBlank()) {
+        if (createdDate == null) {
             throw new IllegalArgumentException(
-                    "Bike ID is required.");
+                    "Created date is required.");
         }
 
-        if (maintenanceIssueId == null
-                || maintenanceIssueId.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Maintenance issue ID is required.");
-        }
+        this.assignedTechnicianId =
+                normalizeOptional(
+                        assignedTechnicianId);
 
-        this.workOrderId = workOrderId;
-        this.bikeId = bikeId;
-        this.maintenanceIssueId = maintenanceIssueId;
-        this.description = description;
-        this.assignedTechnicianId = assignedTechnicianId;
         this.status = status;
         this.createdDate = createdDate;
     }
 
-    
-    public String getMaintenanceIssueId() {
-        return maintenanceIssueId;
-    }
-    
     public String getWorkOrderId() {
         return workOrderId;
     }
@@ -59,15 +71,15 @@ public class WorkOrder {
         return bikeId;
     }
 
+    public String getMaintenanceIssueId() {
+        return maintenanceIssueId;
+    }
+
     public String getDescription() {
         return description;
     }
-    
-    public String getAssignedTechnicianId() {
-        return assignedTechnicianId;
-    }
 
-    public String getAssignedTechnician() {
+    public String getAssignedTechnicianId() {
         return assignedTechnicianId;
     }
 
@@ -79,23 +91,59 @@ public class WorkOrder {
         return createdDate;
     }
 
-    public void assignTechnician(String assignedTechnicianId) {
-        if (assignedTechnicianId == null ||
-        		assignedTechnicianId.isBlank()) {
+    public void assignTechnician(
+            String technicianId) {
 
-            throw new IllegalArgumentException(
-                    "Technician is required.");
+        if ("CLOSED".equals(status)) {
+            throw new IllegalStateException(
+                    "A closed work order cannot be reassigned.");
         }
 
-        this.assignedTechnicianId = assignedTechnicianId;
-        this.status = "ASSIGNED";
+        assignedTechnicianId =
+                requireText(
+                        technicianId,
+                        "Technician ID");
+
+        status = "ASSIGNED";
     }
 
     public void startWork() {
-        this.status = "IN_PROGRESS";
+        if (!"OPEN".equals(status)
+                && !"ASSIGNED".equals(status)) {
+
+            throw new IllegalStateException(
+                    "Only an open or assigned work order can be started.");
+        }
+
+        status = "IN_PROGRESS";
     }
 
     public void close() {
-        this.status = "CLOSED";
+        if (!"IN_PROGRESS".equals(status)) {
+            throw new IllegalStateException(
+                    "Only an in-progress work order can be closed.");
+        }
+
+        status = "CLOSED";
+    }
+
+    private static String requireText(
+            String value,
+            String fieldName) {
+
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(
+                    fieldName + " is required.");
+        }
+
+        return value.trim();
+    }
+
+    private static String normalizeOptional(
+            String value) {
+
+        return value == null || value.isBlank()
+                ? null
+                : value.trim();
     }
 }

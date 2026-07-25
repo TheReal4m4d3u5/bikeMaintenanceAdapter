@@ -1,174 +1,269 @@
 package com.avery.bikemaintenance.application.service;
 
-import com.avery.bikemaintenance.domain.model.Bike;
-import java.util.UUID;
-import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.avery.bikemaintenance.application.port.outbound.BikeRepository;
-import com.avery.bikemaintenance.application.port.outbound.WorkOrderRepository;
-import com.avery.bikemaintenance.domain.model.WorkOrder;
 import com.avery.bikemaintenance.application.port.outbound.MaintenanceIssueRepository;
+import com.avery.bikemaintenance.application.port.outbound.UserAccountRepository;
+import com.avery.bikemaintenance.application.port.outbound.WorkOrderRepository;
+import com.avery.bikemaintenance.domain.model.AuthenticatedUser;
+import com.avery.bikemaintenance.domain.model.Bike;
 import com.avery.bikemaintenance.domain.model.MaintenanceIssue;
+import com.avery.bikemaintenance.domain.model.UserAccount;
+import com.avery.bikemaintenance.domain.model.UserRole;
+import com.avery.bikemaintenance.domain.model.WorkOrder;
 
 @Service
 public class WorkOrderService {
 
-	private final WorkOrderRepository workOrderRepository;
-	private final BikeRepository bikeRepository;
-	private final MaintenanceIssueRepository issueRepository;
+    private final WorkOrderRepository workOrderRepository;
+    private final BikeRepository bikeRepository;
+    private final MaintenanceIssueRepository issueRepository;
+    private final UserAccountRepository userAccountRepository;
+    private final WorkOrderAccessPolicy accessPolicy;
 
-	public WorkOrderService(WorkOrderRepository workOrderRepository, BikeRepository bikeRepository,
-			MaintenanceIssueRepository issueRepository) {
+    public WorkOrderService(
+            WorkOrderRepository workOrderRepository,
+            BikeRepository bikeRepository,
+            MaintenanceIssueRepository issueRepository,
+            UserAccountRepository userAccountRepository,
+            WorkOrderAccessPolicy accessPolicy) {
 
-		this.workOrderRepository = workOrderRepository;
-		this.bikeRepository = bikeRepository;
-		this.issueRepository = issueRepository;
-	}
+        this.workOrderRepository = workOrderRepository;
+        this.bikeRepository = bikeRepository;
+        this.issueRepository = issueRepository;
+        this.userAccountRepository = userAccountRepository;
+        this.accessPolicy = accessPolicy;
+    }
 
-	public WorkOrder createWorkOrder(String bikeId, String maintenanceIssueId, String description,
-			String assignedTechnicianId) {
+    public WorkOrder createWorkOrder(
+            String bikeId,
+            String maintenanceIssueId,
+            String description,
+            String assignedTechnicianId) {
 
-		String workOrderId = UUID.randomUUID().toString();
+        Bike bike = requireBike(bikeId);
+        MaintenanceIssue issue =
+                requireIssue(maintenanceIssueId);
 
-		if (!bikeRepository.existsById(bikeId)) {
-			throw new IllegalArgumentException("Bike does not exist: " + bikeId);
-		}
+        if (!issue.getBikeId().equals(
+                bike.getBikeId())) {
 
-		MaintenanceIssue issue = issueRepository.findById(maintenanceIssueId).orElseThrow(
-				() -> new IllegalArgumentException("Maintenance issue does not exist: " + maintenanceIssueId));
+            throw new IllegalArgumentException(
+                    "Maintenance issue does not belong to bike: "
+                            + bikeId);
+        }
 
-		if (!issue.getBikeId().equals(bikeId)) {
-			throw new IllegalArgumentException("Maintenance issue does not belong to bike: " + bikeId);
-		}
+        if (!"OPEN".equals(issue.getStatus())) {
+            throw new IllegalStateException(
+                    "A work order can be created only for an open maintenance issue.");
+        }
 
+        String normalizedTechnicianId =
+                normalizeTechnicianId(
+                        assignedTechnicianId);
 
-		String status = assignedTechnicianId == null || assignedTechnicianId.isBlank() ? "OPEN" : "ASSIGNED";
+        if (normalizedTechnicianId != null) {
+            requireTechnician(
+                    normalizedTechnicianId);
+        }
 
-		WorkOrder workOrder = new WorkOrder(
-		        workOrderId,
-		        bikeId,
-		        maintenanceIssueId,
-		        description,
-		        assignedTechnicianId,
-		        status,
-		        LocalDate.now()
-		);
+        String status =
+                normalizedTechnicianId == null
+                        ? "OPEN"
+                        : "ASSIGNED";
 
-		WorkOrder savedWorkOrder = workOrderRepository.save(workOrder);
+        WorkOrder workOrder =
+                new WorkOrder(
+                        UUID.randomUUID().toString(),
+                        bikeId,
+                        maintenanceIssueId,
+                        description,
+                        normalizedTechnicianId,
+                        status,
+                        LocalDate.now());
 
-		issue.markWorkOrderCreated();
-		issueRepository.save(issue);
+        WorkOrder savedWorkOrder =
+                workOrderRepository.save(
+                        workOrder);
 
-		return savedWorkOrder;
-	}
+        issue.markWorkOrderCreated();
+        issueRepository.save(issue);
 
-	public Optional<WorkOrder> findById(String workOrderId) {
+        return savedWorkOrder;
+    }
 
-		return workOrderRepository.findById(workOrderId);
-	}
+    public Optional<WorkOrder> findById(
+            String workOrderId) {
 
-	public List<WorkOrder> findAll() {
-		return workOrderRepository.findAll();
-	}
-	
-	public List<WorkOrder> findByAssignedTechnicianId(
-	        String assignedTechnicianId) {
+        return workOrderRepository.findById(
+                workOrderId);
+    }
 
-	    if (assignedTechnicianId == null
-	            || assignedTechnicianId.isBlank()) {
+    public List<WorkOrder> findAll() {
+        return workOrderRepository.findAll();
+    }
 
-	        throw new IllegalArgumentException(
-	                "Technician ID is required.");
-	    }
+    public List<WorkOrder>
+            findByAssignedTechnicianId(
+                    String technicianId) {
 
-	    return workOrderRepository
-	            .findByAssignedTechnicianId(
-	                    assignedTechnicianId);
-	}
+        if (technicianId == null
+                || technicianId.isBlank()) {
 
-	public List<WorkOrder> findByBikeId(String bikeId) {
-		return workOrderRepository.findByBikeId(bikeId);
-	}
+            throw new IllegalArgumentException(
+                    "Technician ID is required.");
+        }
 
-	public WorkOrder startWork(
-	        String workOrderId,
-	        String authenticatedUserId,
-	        String authenticatedRole) {
+        return workOrderRepository
+                .findByAssignedTechnicianId(
+                        technicianId);
+    }
 
-	    WorkOrder workOrder = findAuthorizedWorkOrder(
-	            workOrderId,
-	            authenticatedUserId,
-	            authenticatedRole);
+    public List<WorkOrder> findByBikeId(
+            String bikeId) {
 
-	    Bike bike = bikeRepository
-	            .findById(workOrder.getBikeId())
-	            .orElseThrow(() ->
-	                    new IllegalArgumentException(
-	                            "Bike does not exist: "
-	                                    + workOrder.getBikeId()));
+        return workOrderRepository
+                .findByBikeId(bikeId);
+    }
 
-	    workOrder.startWork();
-	    bike.startRepair();
+    public WorkOrder startWork(
+            String workOrderId,
+            AuthenticatedUser authenticatedUser) {
 
-	    bikeRepository.save(bike);
+        WorkOrder workOrder =
+                requireAuthorizedWorkOrder(
+                        workOrderId,
+                        authenticatedUser);
 
-	    return workOrderRepository.save(workOrder);
-	}
+        Bike bike =
+                requireBike(
+                        workOrder.getBikeId());
 
-	public WorkOrder closeWorkOrder(
-	        String workOrderId,
-	        String authenticatedUserId,
-	        String authenticatedRole) {
+        workOrder.startWork();
+        bike.startRepair();
 
-	    WorkOrder workOrder = findAuthorizedWorkOrder(
-	            workOrderId,
-	            authenticatedUserId,
-	            authenticatedRole);
+        bikeRepository.save(bike);
 
-	    workOrder.close();
+        return workOrderRepository.save(
+                workOrder);
+    }
 
-	    return workOrderRepository.save(workOrder);
-	}
+    public WorkOrder closeWorkOrder(
+            String workOrderId,
+            String resultingBikeCondition,
+            AuthenticatedUser authenticatedUser) {
 
-	private WorkOrder requireWorkOrder(String workOrderId) {
+        WorkOrder workOrder =
+                requireAuthorizedWorkOrder(
+                        workOrderId,
+                        authenticatedUser);
 
-		return workOrderRepository.findById(workOrderId)
-				.orElseThrow(() -> new IllegalArgumentException("Work order does not exist: " + workOrderId));
+        Bike bike =
+                requireBike(
+                        workOrder.getBikeId());
 
-	}
-	
-	private WorkOrder findAuthorizedWorkOrder(
-	        String workOrderId,
-	        String authenticatedUserId,
-	        String authenticatedRole) {
+        MaintenanceIssue issue =
+                requireIssue(
+                        workOrder
+                                .getMaintenanceIssueId());
 
-	    WorkOrder workOrder = workOrderRepository
-	            .findById(workOrderId)
-	            .orElseThrow(() ->
-	                    new IllegalArgumentException(
-	                            "Work order does not exist: "
-	                                    + workOrderId));
+        workOrder.close();
+        bike.completeRepair(
+                resultingBikeCondition);
+        issue.resolve();
 
-	    if ("ADMIN".equals(authenticatedRole)) {
-	        return workOrder;
-	    }
+        bikeRepository.save(bike);
+        issueRepository.save(issue);
 
-	    boolean assignedToTechnician =
-	            "TECHNICIAN".equals(authenticatedRole)
-	            && authenticatedUserId != null
-	            && authenticatedUserId.equals(
-	                    workOrder.getAssignedTechnicianId());
+        return workOrderRepository.save(
+                workOrder);
+    }
 
-	    if (!assignedToTechnician) {
-	        throw new AccessDeniedException(
-	                "You are not assigned to this work order.");
-	    }
+    private WorkOrder requireAuthorizedWorkOrder(
+            String workOrderId,
+            AuthenticatedUser authenticatedUser) {
 
-	    return workOrder;
-	}
+        WorkOrder workOrder =
+                requireWorkOrder(workOrderId);
+
+        accessPolicy.verifyCanModify(
+                authenticatedUser,
+                workOrder);
+
+        return workOrder;
+    }
+
+    private WorkOrder requireWorkOrder(
+            String workOrderId) {
+
+        return workOrderRepository
+                .findById(workOrderId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Work order does not exist: "
+                                        + workOrderId));
+    }
+
+    private Bike requireBike(String bikeId) {
+        return bikeRepository
+                .findById(bikeId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Bike does not exist: "
+                                        + bikeId));
+    }
+
+    private MaintenanceIssue requireIssue(
+            String maintenanceIssueId) {
+
+        return issueRepository
+                .findById(maintenanceIssueId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "Maintenance issue does not exist: "
+                                        + maintenanceIssueId));
+    }
+
+    private UserAccount requireTechnician(
+            String technicianId) {
+
+        UserAccount account =
+                userAccountRepository
+                        .findById(technicianId)
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Technician account does not exist: "
+                                                + technicianId));
+
+        if (account.getRole()
+                != UserRole.TECHNICIAN) {
+
+            throw new IllegalArgumentException(
+                    "Assigned account is not a technician: "
+                            + technicianId);
+        }
+
+        if (!account.isEnabled()) {
+            throw new IllegalArgumentException(
+                    "Assigned technician account is disabled: "
+                            + technicianId);
+        }
+
+        return account;
+    }
+
+    private static String normalizeTechnicianId(
+            String technicianId) {
+
+        return technicianId == null
+                || technicianId.isBlank()
+                        ? null
+                        : technicianId.trim();
+    }
 }

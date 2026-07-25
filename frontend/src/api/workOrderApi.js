@@ -69,17 +69,25 @@ export async function startWork(workOrderId) {
   return data.startWork;
 }
 
-export async function closeWorkOrder(workOrderId) {
+export async function closeWorkOrder(
+  workOrderId,
+  resultingBikeCondition
+) {
   const mutation = `
-    mutation CloseWorkOrder($workOrderId: ID!) {
-      closeWorkOrder(workOrderId: $workOrderId) {
+    mutation CloseWorkOrder(
+      $input: CloseWorkOrderInput!
+    ) {
+      closeWorkOrder(input: $input) {
         ${workOrderFields}
       }
     }
   `;
 
   const data = await graphqlRequest(mutation, {
-    workOrderId,
+    input: {
+      workOrderId,
+      resultingBikeCondition,
+    },
   });
 
   return data.closeWorkOrder;

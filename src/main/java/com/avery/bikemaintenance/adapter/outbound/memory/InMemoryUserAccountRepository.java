@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.avery.bikemaintenance.application.exception.DuplicateEmailException;
+import com.avery.bikemaintenance.application.port.outbound.CredentialRepository;
+import com.avery.bikemaintenance.application.port.outbound.StoredCredential;
 import com.avery.bikemaintenance.application.port.outbound.UserAccountRepository;
 import com.avery.bikemaintenance.domain.model.UserAccount;
 import com.avery.bikemaintenance.domain.model.UserRole;
 
 public class InMemoryUserAccountRepository
-        implements UserAccountRepository {
+        implements UserAccountRepository, CredentialRepository {
 
     private final Map<String, UserAccount> accounts =
             new ConcurrentHashMap<>();
@@ -50,6 +53,18 @@ public class InMemoryUserAccountRepository
     }
 
     @Override
+    public Optional<StoredCredential>
+            findCredentialsByEmail(String email) {
+
+        return findByEmail(email)
+                .map(account ->
+                        new StoredCredential(
+                                account.getUserId(),
+                                account.getPasswordHash(),
+                                account.isEnabled()));
+    }
+
+    @Override
     public List<UserAccount> findAll() {
         return accounts.values()
                 .stream()
@@ -82,9 +97,8 @@ public class InMemoryUserAccountRepository
                         !existingAccount.getUserId().equals(
                                 userAccount.getUserId()))
                 .ifPresent(existingAccount -> {
-                    throw new IllegalArgumentException(
-                            "An account already exists for email: "
-                                    + userAccount.getEmail());
+                    throw new DuplicateEmailException(
+                            userAccount.getEmail());
                 });
     }
 }

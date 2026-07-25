@@ -17,6 +17,8 @@ import "../App.css";
 
 function TechnicianDashboard() {
     const [workOrders, setWorkOrders] = useState([]);
+    const [closeConditions, setCloseConditions] =
+        useState({});
     const [maintenanceIssues, setMaintenanceIssues] =
         useState([]);
 
@@ -86,14 +88,30 @@ function TechnicianDashboard() {
         }
     }
 
+    function handleCloseConditionChange(
+        workOrderId,
+        resultingCondition
+    ) {
+        setCloseConditions((currentConditions) => ({
+            ...currentConditions,
+            [workOrderId]: resultingCondition,
+        }));
+    }
+
     async function handleCloseWorkOrder(workOrderId) {
         try {
             setError("");
 
-            const updatedWorkOrder =
-                await closeWorkOrder(workOrderId);
+            const resultingBikeCondition =
+                closeConditions[workOrderId] ??
+                "AVAILABLE";
 
-            replaceWorkOrder(updatedWorkOrder);
+            await closeWorkOrder(
+                workOrderId,
+                resultingBikeCondition
+            );
+
+            await loadDashboard();
         } catch (requestError) {
             setError(requestError.message);
         }
@@ -246,19 +264,51 @@ function TechnicianDashboard() {
                                                             </button>
                                                         )}
 
-                                                    {workOrder.status !==
-                                                        "CLOSED" && (
-                                                        <button
-                                                            className="primary-button"
-                                                            type="button"
-                                                            onClick={() =>
-                                                                handleCloseWorkOrder(
-                                                                    workOrder.workOrderId
-                                                                )
-                                                            }
-                                                        >
-                                                            Close work order
-                                                        </button>
+                                                    {workOrder.status ===
+                                                        "IN_PROGRESS" && (
+                                                        <>
+                                                            <label className="close-condition-field">
+                                                                Resulting bike condition
+                                                                <select
+                                                                    value={
+                                                                        closeConditions[
+                                                                            workOrder.workOrderId
+                                                                        ] ?? "AVAILABLE"
+                                                                    }
+                                                                    onChange={(event) =>
+                                                                        handleCloseConditionChange(
+                                                                            workOrder.workOrderId,
+                                                                            event.target.value
+                                                                        )
+                                                                    }
+                                                                >
+                                                                    <option value="AVAILABLE">
+                                                                        Available
+                                                                    </option>
+                                                                    <option value="DUE_FOR_SCHEDULED_MAINTENANCE">
+                                                                        Due for scheduled maintenance
+                                                                    </option>
+                                                                    <option value="OUT_OF_SERVICE">
+                                                                        Out of service
+                                                                    </option>
+                                                                    <option value="RETIRED">
+                                                                        Retired
+                                                                    </option>
+                                                                </select>
+                                                            </label>
+
+                                                            <button
+                                                                className="primary-button"
+                                                                type="button"
+                                                                onClick={() =>
+                                                                    handleCloseWorkOrder(
+                                                                        workOrder.workOrderId
+                                                                    )
+                                                                }
+                                                            >
+                                                                Close work order
+                                                            </button>
+                                                        </>
                                                     )}
                                                 </div>
                                             </article>

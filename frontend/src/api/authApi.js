@@ -1,5 +1,3 @@
-const TOKEN_STORAGE_KEY = "bikeMaintenanceAuthToken";
-
 async function authRequest(path, options = {}) {
   const response = await fetch(path, {
     ...options,
@@ -57,16 +55,4 @@ export async function getCurrentUser(token) {
       Authorization: `Bearer ${token}`,
     },
   });
-}
-
-export function saveAuthToken(token) {
-  localStorage.setItem(TOKEN_STORAGE_KEY, token);
-}
-
-export function loadAuthToken() {
-  return localStorage.getItem(TOKEN_STORAGE_KEY);
-}
-
-export function removeAuthToken() {
-  localStorage.removeItem(TOKEN_STORAGE_KEY);
 }

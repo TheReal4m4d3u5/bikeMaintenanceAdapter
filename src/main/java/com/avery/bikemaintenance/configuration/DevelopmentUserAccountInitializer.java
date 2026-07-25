@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.configuration;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,6 +11,7 @@ import com.avery.bikemaintenance.domain.model.UserAccount;
 import com.avery.bikemaintenance.domain.model.UserRole;
 
 @Component
+@Profile("!prod")
 public class DevelopmentUserAccountInitializer
         implements CommandLineRunner {
 

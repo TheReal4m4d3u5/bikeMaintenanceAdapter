@@ -1,6 +1,24 @@
 package com.avery.bikemaintenance.domain.model;
 
+import java.util.Set;
+
 public class Bike {
+
+    private static final Set<String> VALID_CONDITIONS =
+            Set.of(
+                    "AVAILABLE",
+                    "DUE_FOR_SCHEDULED_MAINTENANCE",
+                    "OUT_OF_SERVICE",
+                    "UNDER_REPAIR",
+                    "RETIRED");
+
+    private static final Set<String>
+            VALID_REPAIR_OUTCOMES =
+                    Set.of(
+                            "AVAILABLE",
+                            "DUE_FOR_SCHEDULED_MAINTENANCE",
+                            "OUT_OF_SERVICE",
+                            "RETIRED");
 
     private final String bikeId;
     private final String model;
@@ -25,10 +43,7 @@ public class Bike {
                     "Bike model is required.");
         }
 
-        if (condition == null || condition.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Bike condition is required.");
-        }
+        validateCondition(condition);
 
         if (rideCount < 0) {
             throw new IllegalArgumentException(
@@ -58,9 +73,16 @@ public class Bike {
     public String getCondition() {
         return condition;
     }
-    
-    public void startRepair() {
 
+    public int getRideCount() {
+        return rideCount;
+    }
+
+    public double getMileage() {
+        return mileage;
+    }
+
+    public void startRepair() {
         if ("RETIRED".equals(condition)) {
             throw new IllegalStateException(
                     "A retired bike cannot be placed under repair.");
@@ -69,11 +91,34 @@ public class Bike {
         condition = "UNDER_REPAIR";
     }
 
-    public int getRideCount() {
-        return rideCount;
+    public void completeRepair(
+            String resultingCondition) {
+
+        if (!"UNDER_REPAIR".equals(condition)) {
+            throw new IllegalStateException(
+                    "The bike is not currently under repair.");
+        }
+
+        if (!VALID_REPAIR_OUTCOMES.contains(
+                resultingCondition)) {
+
+            throw new IllegalArgumentException(
+                    "Invalid repair outcome: "
+                            + resultingCondition);
+        }
+
+        condition = resultingCondition;
     }
 
-    public double getMileage() {
-        return mileage;
+    private static void validateCondition(
+            String condition) {
+
+        if (condition == null
+                || condition.isBlank()
+                || !VALID_CONDITIONS.contains(condition)) {
+
+            throw new IllegalArgumentException(
+                    "Invalid bike condition: " + condition);
+        }
     }
 }

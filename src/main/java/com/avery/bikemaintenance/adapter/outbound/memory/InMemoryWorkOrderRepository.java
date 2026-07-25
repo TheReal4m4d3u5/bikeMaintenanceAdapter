@@ -1,8 +1,6 @@
 package com.avery.bikemaintenance.adapter.outbound.memory;
 
-
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Repository;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,11 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.avery.bikemaintenance.application.port.outbound.WorkOrderRepository;
 import com.avery.bikemaintenance.domain.model.WorkOrder;
 
-@Repository
-@ConditionalOnProperty(
-        name = "app.repository.work-order",
-        havingValue = "memory",
-        matchIfMissing = true)
 public class InMemoryWorkOrderRepository
         implements WorkOrderRepository {
 
@@ -23,17 +16,22 @@ public class InMemoryWorkOrderRepository
             new ConcurrentHashMap<>();
 
     @Override
-    public Optional<WorkOrder> findById(String workOrderId) {
+    public Optional<WorkOrder> findById(
+            String workOrderId) {
+
         return Optional.ofNullable(
-                workOrders.get(workOrderId)
-        );
+                workOrders.get(workOrderId));
     }
 
     @Override
     public List<WorkOrder> findAll() {
-        return List.copyOf(workOrders.values());
+        return workOrders.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        WorkOrder::getWorkOrderId))
+                .toList();
     }
-    
+
     @Override
     public List<WorkOrder> findByAssignedTechnicianId(
             String assignedTechnicianId) {
@@ -43,6 +41,8 @@ public class InMemoryWorkOrderRepository
                 .filter(workOrder ->
                         assignedTechnicianId.equals(
                                 workOrder.getAssignedTechnicianId()))
+                .sorted(Comparator.comparing(
+                        WorkOrder::getWorkOrderId))
                 .toList();
     }
 
@@ -52,6 +52,8 @@ public class InMemoryWorkOrderRepository
                 .stream()
                 .filter(workOrder ->
                         workOrder.getBikeId().equals(bikeId))
+                .sorted(Comparator.comparing(
+                        WorkOrder::getWorkOrderId))
                 .toList();
     }
 
@@ -59,8 +61,7 @@ public class InMemoryWorkOrderRepository
     public WorkOrder save(WorkOrder workOrder) {
         workOrders.put(
                 workOrder.getWorkOrderId(),
-                workOrder
-        );
+                workOrder);
 
         return workOrder;
     }

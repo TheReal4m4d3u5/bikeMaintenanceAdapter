@@ -388,3 +388,14 @@
     align-items: center;
     justify-content: center;
 }
+
+.close-condition-field {
+    display: grid;
+    gap: 6px;
+    min-width: 220px;
+    font-weight: 600;
+}
+
+.close-condition-field select {
+    width: 100%;
+}

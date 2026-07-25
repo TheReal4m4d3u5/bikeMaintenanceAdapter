@@ -1,0 +1,98 @@
+type Query {
+    bikes: [Bike!]!
+    bikeById(bikeId: ID!): Bike
+
+    maintenanceIssues: [MaintenanceIssue!]!
+    maintenanceIssueById(
+        maintenanceIssueId: ID!
+    ): MaintenanceIssue
+    maintenanceIssuesByBikeId(
+        bikeId: ID!
+    ): [MaintenanceIssue!]!
+    maintenanceIssuesByReportedByUserId(
+        reportedByUserId: ID!
+    ): [MaintenanceIssue!]!
+
+    workOrders: [WorkOrder!]!
+    workOrderById(
+        workOrderId: ID!
+    ): WorkOrder
+    workOrdersByBikeId(
+        bikeId: ID!
+    ): [WorkOrder!]!
+    workOrdersByAssignedTechnicianId(
+        assignedTechnicianId: ID!
+    ): [WorkOrder!]!
+}
+
+type Mutation {
+    saveBike(
+        input: ProviderBikeInput!
+    ): Bike!
+
+    saveMaintenanceIssue(
+        input: ProviderMaintenanceIssueInput!
+    ): MaintenanceIssue!
+
+    saveWorkOrder(
+        input: ProviderWorkOrderInput!
+    ): WorkOrder!
+}
+
+type Bike {
+    bikeId: ID!
+    model: String!
+    condition: String!
+    rideCount: Int!
+    mileage: Float!
+}
+
+type MaintenanceIssue {
+    maintenanceIssueId: ID!
+    bikeId: ID!
+    reportedByUserId: ID
+    sourceType: String!
+    description: String!
+    severity: String!
+    status: String!
+    reportedDate: String!
+}
+
+type WorkOrder {
+    workOrderId: ID!
+    bikeId: ID!
+    maintenanceIssueId: ID!
+    description: String!
+    assignedTechnicianId: ID
+    status: String!
+    createdDate: String!
+}
+
+input ProviderBikeInput {
+    bikeId: ID!
+    model: String!
+    condition: String!
+    rideCount: Int!
+    mileage: Float!
+}
+
+input ProviderMaintenanceIssueInput {
+    maintenanceIssueId: ID!
+    bikeId: ID!
+    reportedByUserId: ID
+    sourceType: String!
+    description: String!
+    severity: String!
+    status: String!
+    reportedDate: String!
+}
+
+input ProviderWorkOrderInput {
+    workOrderId: ID!
+    bikeId: ID!
+    maintenanceIssueId: ID!
+    description: String!
+    assignedTechnicianId: ID
+    status: String!
+    createdDate: String!
+}

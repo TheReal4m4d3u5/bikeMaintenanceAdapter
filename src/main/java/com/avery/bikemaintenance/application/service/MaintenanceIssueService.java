@@ -1,9 +1,9 @@
 package com.avery.bikemaintenance.application.service;
 
-import java.util.UUID;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -14,7 +14,9 @@ import com.avery.bikemaintenance.domain.model.MaintenanceIssue;
 @Service
 public class MaintenanceIssueService {
 
-    private final MaintenanceIssueRepository issueRepository;
+    private final MaintenanceIssueRepository
+            issueRepository;
+
     private final BikeRepository bikeRepository;
 
     public MaintenanceIssueService(
@@ -32,18 +34,22 @@ public class MaintenanceIssueService {
             String description,
             String severity) {
 
-        String maintenanceIssueId = UUID.randomUUID().toString();
+        if (!bikeRepository.existsById(bikeId)) {
+            throw new IllegalArgumentException(
+                    "Bike does not exist: " + bikeId);
+        }
 
-        MaintenanceIssue issue = new MaintenanceIssue(
-                maintenanceIssueId,
-                bikeId,
-                reportedByUserId,
-                sourceType,
-                description,
-                severity,
-                "OPEN",
-                LocalDate.now()
-        );
+        MaintenanceIssue issue =
+                new MaintenanceIssue(
+                        UUID.randomUUID().toString(),
+                        bikeId,
+                        reportedByUserId,
+                        sourceType,
+                        description,
+                        severity,
+                        "OPEN",
+                        LocalDate.now());
+
         return issueRepository.save(issue);
     }
 
@@ -57,9 +63,10 @@ public class MaintenanceIssueService {
     public List<MaintenanceIssue> findAll() {
         return issueRepository.findAll();
     }
-    
-    public List<MaintenanceIssue> findByReportedByUserId(
-            String reportedByUserId) {
+
+    public List<MaintenanceIssue>
+            findByReportedByUserId(
+                    String reportedByUserId) {
 
         if (reportedByUserId == null
                 || reportedByUserId.isBlank()) {
@@ -76,14 +83,17 @@ public class MaintenanceIssueService {
     public List<MaintenanceIssue> findByBikeId(
             String bikeId) {
 
-        return issueRepository.findByBikeId(bikeId);
+        return issueRepository.findByBikeId(
+                bikeId);
     }
 
-    public MaintenanceIssue markWorkOrderCreated(
-            String maintenanceIssueId) {
+    public MaintenanceIssue
+            markWorkOrderCreated(
+                    String maintenanceIssueId) {
 
         MaintenanceIssue issue =
-                requireIssue(maintenanceIssueId);
+                requireIssue(
+                        maintenanceIssueId);
 
         issue.markWorkOrderCreated();
 
@@ -94,7 +104,8 @@ public class MaintenanceIssueService {
             String maintenanceIssueId) {
 
         MaintenanceIssue issue =
-                requireIssue(maintenanceIssueId);
+                requireIssue(
+                        maintenanceIssueId);
 
         issue.resolve();
 

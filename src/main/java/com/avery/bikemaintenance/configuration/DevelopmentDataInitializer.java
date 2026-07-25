@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.configuration;
 
+import org.springframework.context.annotation.Profile;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -9,6 +10,7 @@ import com.avery.bikemaintenance.application.service.MaintenanceIssueService;
 import com.avery.bikemaintenance.domain.model.Bike;
 
 @Component
+@Profile("!prod")
 @ConditionalOnProperty(
         name = "app.seed-data",
         havingValue = "true")
@@ -28,6 +30,10 @@ public class DevelopmentDataInitializer
 
     @Override
     public void run(String... args) {
+
+        if (!bikeService.findAllBikes().isEmpty()) {
+            return;
+        }
 
     	Bike bike = bikeService.createBike(
     	        "Metro Commuter",

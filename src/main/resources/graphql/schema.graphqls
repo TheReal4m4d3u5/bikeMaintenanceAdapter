@@ -1,5 +1,7 @@
 type Query {
-	technicians: [TechnicianAccount!]!
+    repositoryProvider: String!
+    technicians: [TechnicianAccount!]!
+
     bikes: [Bike!]!
     bikeById(bikeId: ID!): Bike
 
@@ -52,7 +54,7 @@ type Mutation {
     ): WorkOrder!
 
     closeWorkOrder(
-        workOrderId: ID!
+        input: CloseWorkOrderInput!
     ): WorkOrder!
 }
 
@@ -72,6 +74,7 @@ type MaintenanceIssue {
     description: String!
     severity: String!
     status: String!
+    reportedDate: String!
 }
 
 type WorkOrder {
@@ -117,4 +120,9 @@ input WorkOrderInput {
     maintenanceIssueId: ID!
     description: String!
     assignedTechnicianId: ID
+}
+
+input CloseWorkOrderInput {
+    workOrderId: ID!
+    resultingBikeCondition: String!
 }

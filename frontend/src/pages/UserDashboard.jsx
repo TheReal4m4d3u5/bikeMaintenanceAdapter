@@ -117,7 +117,10 @@ function UserDashboard() {
     }
 
 	const availableBikes = bikes.filter(
-	    (bike) => bike.condition === "AVAILABLE"
+	    (bike) =>
+            bike.condition === "AVAILABLE" ||
+            bike.condition ===
+                "DUE_FOR_SCHEDULED_MAINTENANCE"
 	);
 	
 	

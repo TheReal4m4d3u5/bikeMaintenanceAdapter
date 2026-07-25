@@ -7,12 +7,19 @@ import {
 
 import {
   getCurrentUser,
-  loadAuthToken,
   loginAccount,
   registerAccount,
+} from "../api/authApi.js";
+
+import {
+  loadAuthToken,
   removeAuthToken,
   saveAuthToken,
-} from "../api/authApi";
+} from "./tokenStorage.js";
+
+import {
+  setOnUnauthorized,
+} from "../api/graphqlClient.js";
 
 const AuthContext = createContext(null);
 
@@ -26,6 +33,14 @@ export function AuthProvider({ children }) {
     useState(true);
   const [authError, setAuthError] =
     useState("");
+
+  useEffect(() => {
+    setOnUnauthorized(logout);
+
+    return () => {
+      setOnUnauthorized(null);
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;

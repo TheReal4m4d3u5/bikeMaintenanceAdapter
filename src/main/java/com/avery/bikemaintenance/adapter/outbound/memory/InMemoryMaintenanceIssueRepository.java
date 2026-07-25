@@ -1,7 +1,6 @@
 package com.avery.bikemaintenance.adapter.outbound.memory;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Repository;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,11 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.avery.bikemaintenance.application.port.outbound.MaintenanceIssueRepository;
 import com.avery.bikemaintenance.domain.model.MaintenanceIssue;
 
-@Repository
-@ConditionalOnProperty(
-        name = "app.repository.maintenance-issue",
-        havingValue = "memory",
-        matchIfMissing = true)
 public class InMemoryMaintenanceIssueRepository
         implements MaintenanceIssueRepository {
 
@@ -31,7 +25,11 @@ public class InMemoryMaintenanceIssueRepository
 
     @Override
     public List<MaintenanceIssue> findAll() {
-        return List.copyOf(issues.values());
+        return issues.values()
+                .stream()
+                .sorted(Comparator.comparing(
+                        MaintenanceIssue::getMaintenanceIssueId))
+                .toList();
     }
 
     @Override
@@ -42,6 +40,8 @@ public class InMemoryMaintenanceIssueRepository
                 .stream()
                 .filter(issue ->
                         issue.getBikeId().equals(bikeId))
+                .sorted(Comparator.comparing(
+                        MaintenanceIssue::getMaintenanceIssueId))
                 .toList();
     }
 
@@ -54,9 +54,11 @@ public class InMemoryMaintenanceIssueRepository
                 .filter(issue ->
                         reportedByUserId.equals(
                                 issue.getReportedByUserId()))
+                .sorted(Comparator.comparing(
+                        MaintenanceIssue::getMaintenanceIssueId))
                 .toList();
     }
-    
+
     @Override
     public MaintenanceIssue save(
             MaintenanceIssue issue) {

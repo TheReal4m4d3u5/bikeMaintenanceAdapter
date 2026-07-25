@@ -6,13 +6,14 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.avery.bikemaintenance.adapter.outbound.memory.InMemoryUserAccountRepository;
-import com.avery.bikemaintenance.application.port.outbound.UserAccountRepository;
 
 @Configuration
 public class UserAccountConfiguration {
 
     @Bean
-    public UserAccountRepository userAccountRepository() {
+    public InMemoryUserAccountRepository
+            userAccountRepository() {
+
         return new InMemoryUserAccountRepository();
     }
 

@@ -102,10 +102,20 @@ public class MaintenanceIssue {
     }
 
     public void markWorkOrderCreated() {
+        if (!"OPEN".equals(status)) {
+            throw new IllegalStateException(
+                    "A work order can be created only for an open issue.");
+        }
+
         status = "WORK_ORDER_CREATED";
     }
 
     public void resolve() {
+        if ("RESOLVED".equals(status)) {
+            throw new IllegalStateException(
+                    "The maintenance issue is already resolved.");
+        }
+
         status = "RESOLVED";
     }
 }

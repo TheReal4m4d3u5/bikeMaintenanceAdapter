@@ -1,7 +1,6 @@
 package com.avery.bikemaintenance.adapter.outbound.memory;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.stereotype.Repository;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,13 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.avery.bikemaintenance.application.port.outbound.BikeRepository;
 import com.avery.bikemaintenance.domain.model.Bike;
 
-
-
-@Repository
-@ConditionalOnProperty(
-        name = "app.repository.bike",
-        havingValue = "memory",
-        matchIfMissing = true)
 public class InMemoryBikeRepository
         implements BikeRepository {
 
@@ -30,7 +22,10 @@ public class InMemoryBikeRepository
 
     @Override
     public List<Bike> findAll() {
-        return List.copyOf(bikes.values());
+        return bikes.values()
+                .stream()
+                .sorted(Comparator.comparing(Bike::getBikeId))
+                .toList();
     }
 
     @Override
