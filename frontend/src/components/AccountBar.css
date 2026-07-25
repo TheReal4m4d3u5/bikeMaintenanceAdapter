@@ -1,0 +1,54 @@
+.account-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-width: 1060px;
+  margin: 0 auto 24px;
+  padding: 14px 18px;
+  border: 1px solid #d5deea;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(30, 55, 90, 0.07);
+}
+
+.account-bar p {
+  margin: 0;
+}
+
+.account-bar-label {
+  color: #66758b;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.account-bar-user {
+  margin-top: 3px !important;
+  color: #111827;
+  font-weight: 800;
+}
+
+.account-bar-role {
+  margin-top: 2px !important;
+  color: #2563eb;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.account-bar-logout {
+  padding: 10px 18px;
+  border: 1px solid #c8d4e5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111827;
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.account-bar-logout:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+}
