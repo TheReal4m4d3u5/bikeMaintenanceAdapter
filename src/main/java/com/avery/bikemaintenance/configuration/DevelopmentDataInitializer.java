@@ -39,11 +39,11 @@ public class DevelopmentDataInitializer
         bikeService.saveBike(bike);
 
         maintenanceIssueService.createIssue(
-                "ISSUE-1001",
-                "BIKE-1001",
-                "DETECTED_FAULT",
-                "Rear brake is not applying enough pressure",
-                "HIGH");
+        	    "BIKE-1001",
+        	    "DETECTED_FAULT",
+        	    "Rear brake is not working",
+        	    "HIGH"
+        	);
 
         System.out.println(
                 "Development sample data initialized.");

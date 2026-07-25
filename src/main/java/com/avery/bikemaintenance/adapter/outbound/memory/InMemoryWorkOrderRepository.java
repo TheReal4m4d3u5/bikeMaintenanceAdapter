@@ -1,5 +1,7 @@
 package com.avery.bikemaintenance.adapter.outbound.memory;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.avery.bikemaintenance.application.port.outbound.WorkOrderRepository;
 import com.avery.bikemaintenance.domain.model.WorkOrder;
 
+@Repository
+@ConditionalOnProperty(
+        name = "app.repository.work-order",
+        havingValue = "memory",
+        matchIfMissing = true)
 public class InMemoryWorkOrderRepository
         implements WorkOrderRepository {
 

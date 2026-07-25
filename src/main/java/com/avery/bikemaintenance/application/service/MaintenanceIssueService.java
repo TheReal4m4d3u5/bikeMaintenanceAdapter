@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.application.service;
 
+import java.util.UUID;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -25,34 +26,22 @@ public class MaintenanceIssueService {
     }
 
     public MaintenanceIssue createIssue(
-            String maintenanceIssueId,
             String bikeId,
             String sourceType,
             String description,
             String severity) {
 
-        if (!bikeRepository.existsById(bikeId)) {
-            throw new IllegalArgumentException(
-                    "Bike does not exist: " + bikeId);
-        }
+        String maintenanceIssueId = UUID.randomUUID().toString();
 
-        if (issueRepository.existsById(
-                maintenanceIssueId)) {
-
-            throw new IllegalArgumentException(
-                    "Maintenance issue already exists: "
-                            + maintenanceIssueId);
-        }
-
-        MaintenanceIssue issue =
-                new MaintenanceIssue(
-                        maintenanceIssueId,
-                        bikeId,
-                        sourceType,
-                        description,
-                        severity,
-                        "OPEN",
-                        LocalDate.now());
+        MaintenanceIssue issue = new MaintenanceIssue(
+                maintenanceIssueId,
+                bikeId,
+                sourceType,
+                description,
+                severity,
+                "OPEN",
+                LocalDate.now()
+        );
 
         return issueRepository.save(issue);
     }

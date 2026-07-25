@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.adapter.inbound.graphql;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -30,14 +31,16 @@ public class BikeGraphQlController {
                 .orElse(null);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
     public Bike saveBike(@Argument BikeInput input) {
         Bike bike = new Bike(
-                input.bikeId(),
-                input.model(),
-                input.condition(),
-                input.rideCount(),
-                input.mileage());
+            input.bikeId(),
+            input.model(),
+            input.condition(),
+            input.rideCount(),
+            input.mileage()
+        );
 
         return bikeService.saveBike(bike);
     }

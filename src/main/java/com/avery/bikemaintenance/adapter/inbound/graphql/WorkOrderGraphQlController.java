@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.adapter.inbound.graphql;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -41,6 +42,7 @@ public class WorkOrderGraphQlController {
         return workOrderService.findByBikeId(bikeId);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
     public WorkOrder createWorkOrder(
             @Argument WorkOrderInput input) {
@@ -53,6 +55,8 @@ public class WorkOrderGraphQlController {
     	        input.assignedTechnician());
     }
 
+    
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     @MutationMapping
     public WorkOrder startWork(
             @Argument String workOrderId) {
@@ -60,6 +64,7 @@ public class WorkOrderGraphQlController {
         return workOrderService.startWork(workOrderId);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     @MutationMapping
     public WorkOrder closeWorkOrder(
             @Argument String workOrderId) {

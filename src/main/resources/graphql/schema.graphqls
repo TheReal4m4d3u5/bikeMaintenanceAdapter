@@ -62,7 +62,6 @@ input BikeInput {
 }
 
 input MaintenanceIssueInput {
-    maintenanceIssueId: ID!
     bikeId: ID!
     sourceType: String!
     description: String!

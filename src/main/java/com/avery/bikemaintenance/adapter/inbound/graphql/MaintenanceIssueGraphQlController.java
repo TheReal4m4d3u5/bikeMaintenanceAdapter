@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.adapter.inbound.graphql;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import java.util.List;
 
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -42,18 +43,19 @@ public class MaintenanceIssueGraphQlController {
         return maintenanceIssueService.findByBikeId(bikeId);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @MutationMapping
     public MaintenanceIssue createMaintenanceIssue(
             @Argument MaintenanceIssueInput input) {
 
         return maintenanceIssueService.createIssue(
-                input.maintenanceIssueId(),
                 input.bikeId(),
                 input.sourceType(),
                 input.description(),
                 input.severity());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     @MutationMapping
     public MaintenanceIssue resolveMaintenanceIssue(
             @Argument String maintenanceIssueId) {
