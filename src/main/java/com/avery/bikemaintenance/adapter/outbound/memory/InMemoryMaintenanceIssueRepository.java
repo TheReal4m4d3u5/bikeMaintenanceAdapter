@@ -46,6 +46,18 @@ public class InMemoryMaintenanceIssueRepository
     }
 
     @Override
+    public List<MaintenanceIssue> findByReportedByUserId(
+            String reportedByUserId) {
+
+        return issues.values()
+                .stream()
+                .filter(issue ->
+                        reportedByUserId.equals(
+                                issue.getReportedByUserId()))
+                .toList();
+    }
+    
+    @Override
     public MaintenanceIssue save(
             MaintenanceIssue issue) {
 

@@ -4,7 +4,7 @@ public class Bike {
 
     private final String bikeId;
     private final String model;
-    private final String condition;
+    private String condition;
     private final int rideCount;
     private final double mileage;
 
@@ -57,6 +57,16 @@ public class Bike {
 
     public String getCondition() {
         return condition;
+    }
+    
+    public void startRepair() {
+
+        if ("RETIRED".equals(condition)) {
+            throw new IllegalStateException(
+                    "A retired bike cannot be placed under repair.");
+        }
+
+        condition = "UNDER_REPAIR";
     }
 
     public int getRideCount() {

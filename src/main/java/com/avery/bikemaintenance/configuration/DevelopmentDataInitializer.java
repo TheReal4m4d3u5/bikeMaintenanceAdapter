@@ -29,21 +29,18 @@ public class DevelopmentDataInitializer
     @Override
     public void run(String... args) {
 
-        Bike bike = new Bike(
-                "BIKE-1001",
-                "Metro Commuter",
-                "AVAILABLE",
-                240,
-                1148.5);
+    	Bike bike = bikeService.createBike(
+    	        "Metro Commuter",
+    	        "AVAILABLE",
+    	        240,
+    	        1148.5);
 
-        bikeService.saveBike(bike);
-
-        maintenanceIssueService.createIssue(
-        	    "BIKE-1001",
-        	    "DETECTED_FAULT",
-        	    "Rear brake is not working",
-        	    "HIGH"
-        	);
+    	maintenanceIssueService.createIssue(
+    	        bike.getBikeId(),
+    	        null,
+    	        "DETECTED_FAULT",
+    	        "Rear brake is not working",
+    	        "HIGH");
 
         System.out.println(
                 "Development sample data initialized.");

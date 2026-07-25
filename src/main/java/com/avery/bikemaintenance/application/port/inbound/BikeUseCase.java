@@ -11,5 +11,16 @@ public interface BikeUseCase {
 
     List<Bike> findAllBikes();
 
-    Bike saveBike(Bike bike);
+    Bike createBike(
+            String model,
+            String condition,
+            int rideCount,
+            double mileage);
+
+    Bike updateBike(
+            String bikeId,
+            String model,
+            String condition,
+            int rideCount,
+            double mileage);
 }

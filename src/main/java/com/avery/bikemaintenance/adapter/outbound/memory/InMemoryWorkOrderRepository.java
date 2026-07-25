@@ -1,5 +1,6 @@
 package com.avery.bikemaintenance.adapter.outbound.memory;
 
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import java.util.List;
@@ -31,6 +32,18 @@ public class InMemoryWorkOrderRepository
     @Override
     public List<WorkOrder> findAll() {
         return List.copyOf(workOrders.values());
+    }
+    
+    @Override
+    public List<WorkOrder> findByAssignedTechnicianId(
+            String assignedTechnicianId) {
+
+        return workOrders.values()
+                .stream()
+                .filter(workOrder ->
+                        assignedTechnicianId.equals(
+                                workOrder.getAssignedTechnicianId()))
+                .toList();
     }
 
     @Override

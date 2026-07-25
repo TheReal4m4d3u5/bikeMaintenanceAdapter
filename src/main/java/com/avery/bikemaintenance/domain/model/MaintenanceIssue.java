@@ -6,6 +6,7 @@ public class MaintenanceIssue {
 
     private final String maintenanceIssueId;
     private final String bikeId;
+    private final String reportedByUserId;
     private final String sourceType;
     private final String description;
     private final String severity;
@@ -15,6 +16,7 @@ public class MaintenanceIssue {
     public MaintenanceIssue(
             String maintenanceIssueId,
             String bikeId,
+            String reportedByUserId,
             String sourceType,
             String description,
             String severity,
@@ -59,6 +61,7 @@ public class MaintenanceIssue {
 
         this.maintenanceIssueId = maintenanceIssueId;
         this.bikeId = bikeId;
+        this.reportedByUserId = reportedByUserId;
         this.sourceType = sourceType;
         this.description = description;
         this.severity = severity;
@@ -72,6 +75,10 @@ public class MaintenanceIssue {
 
     public String getBikeId() {
         return bikeId;
+    }
+    
+    public String getReportedByUserId() {
+        return reportedByUserId;
     }
 
     public String getSourceType() {

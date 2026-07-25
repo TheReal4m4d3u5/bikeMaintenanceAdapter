@@ -27,6 +27,7 @@ public class MaintenanceIssueService {
 
     public MaintenanceIssue createIssue(
             String bikeId,
+            String reportedByUserId,
             String sourceType,
             String description,
             String severity) {
@@ -36,13 +37,13 @@ public class MaintenanceIssueService {
         MaintenanceIssue issue = new MaintenanceIssue(
                 maintenanceIssueId,
                 bikeId,
+                reportedByUserId,
                 sourceType,
                 description,
                 severity,
                 "OPEN",
                 LocalDate.now()
         );
-
         return issueRepository.save(issue);
     }
 
@@ -55,6 +56,21 @@ public class MaintenanceIssueService {
 
     public List<MaintenanceIssue> findAll() {
         return issueRepository.findAll();
+    }
+    
+    public List<MaintenanceIssue> findByReportedByUserId(
+            String reportedByUserId) {
+
+        if (reportedByUserId == null
+                || reportedByUserId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Reporter user ID is required.");
+        }
+
+        return issueRepository
+                .findByReportedByUserId(
+                        reportedByUserId);
     }
 
     public List<MaintenanceIssue> findByBikeId(

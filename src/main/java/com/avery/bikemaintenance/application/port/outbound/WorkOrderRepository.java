@@ -13,6 +13,9 @@ public interface WorkOrderRepository {
 
     List<WorkOrder> findByBikeId(String bikeId);
 
+    List<WorkOrder> findByAssignedTechnicianId(
+            String assignedTechnicianId);
+
     WorkOrder save(WorkOrder workOrder);
 
     boolean existsById(String workOrderId);

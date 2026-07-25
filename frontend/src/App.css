@@ -284,3 +284,107 @@
     grid-template-columns: 1fr;
   }
 }
+
+.user-dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(0, 2fr);
+    gap: 24px;
+    align-items: start;
+    width: 100%;
+}
+
+.user-dashboard-grid > .panel {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+}
+
+.user-fleet-panel {
+    grid-column: 1 / -1;
+}
+
+.user-report-panel {
+    grid-column: 1;
+}
+
+.user-issues-panel {
+    grid-column: 2;
+}
+
+.user-issues-panel .maintenance-issue-card {
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    .user-dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-fleet-panel,
+    .user-report-panel,
+    .user-issues-panel {
+        grid-column: 1;
+    }
+}
+
+.fleet-status-groups {
+    display: grid;
+    gap: 24px;
+}
+
+.fleet-status-section {
+    min-width: 0;
+}
+
+.fleet-status-section + .fleet-status-section {
+    border-top: 1px solid #d8e1ee;
+    padding-top: 24px;
+}
+
+.fleet-status-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 14px;
+}
+
+.fleet-status-heading > div {
+    min-width: 0;
+}
+
+.fleet-status-heading h3 {
+    margin: 0 0 6px;
+}
+
+.fleet-status-heading .panel-description {
+    margin: 0;
+}
+
+.fleet-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    min-width: 34px;
+    height: 34px;
+    padding: 0 10px;
+
+    border-radius: 999px;
+    background: #e4edff;
+    color: #1746c7;
+
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.fleet-status-section .empty-state {
+    margin: 0;
+    min-height: 76px;
+    padding: 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

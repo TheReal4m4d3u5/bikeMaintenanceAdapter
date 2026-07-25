@@ -1,37 +1,4 @@
-const GRAPHQL_URL = "/graphql";
-
-async function executeGraphQl(query, variables = {}) {
-  const response = await fetch(GRAPHQL_URL, {
-    method: "POST",
-
-    headers: {
-      "Content-Type": "application/json",
-    },
-
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `GraphQL request failed with status ${response.status}`
-    );
-  }
-
-  const result = await response.json();
-
-  if (result.errors?.length) {
-    const message = result.errors
-      .map((error) => error.message)
-      .join(", ");
-
-    throw new Error(message);
-  }
-
-  return result.data;
-}
+import { graphqlRequest } from "./graphqlClient";
 
 export async function getBikes() {
   const query = `
@@ -46,15 +13,15 @@ export async function getBikes() {
     }
   `;
 
-  const data = await executeGraphQl(query);
+  const data = await graphqlRequest(query);
 
   return data.bikes;
 }
 
-export async function saveBike(input) {
+export async function createBike(input) {
   const mutation = `
-    mutation SaveBike($input: BikeInput!) {
-      saveBike(input: $input) {
+    mutation CreateBike($input: CreateBikeInput!) {
+      createBike(input: $input) {
         bikeId
         model
         condition
@@ -64,9 +31,29 @@ export async function saveBike(input) {
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
+  const data = await graphqlRequest(mutation, {
     input,
   });
 
-  return data.saveBike;
+  return data.createBike;
+}
+
+export async function updateBike(input) {
+  const mutation = `
+    mutation UpdateBike($input: BikeInput!) {
+      updateBike(input: $input) {
+        bikeId
+        model
+        condition
+        rideCount
+        mileage
+      }
+    }
+  `;
+
+  const data = await graphqlRequest(mutation, {
+    input,
+  });
+
+  return data.updateBike;
 }

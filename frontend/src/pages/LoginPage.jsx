@@ -126,6 +126,14 @@ export default function LoginPage({
 
           <p>technician@example.com</p>
           <p>Tech12345!</p>
+		  
+		  
+		  <strong>Development user</strong>
+		  <br />
+		  user@example.com
+		  <br />
+		  User12345!
+		  
         </div>
       </section>
     </main>

@@ -1,5 +1,8 @@
 package com.avery.bikemaintenance.application.service;
 
+import com.avery.bikemaintenance.domain.model.Bike;
+import java.util.UUID;
+import org.springframework.security.access.AccessDeniedException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -12,115 +15,160 @@ import com.avery.bikemaintenance.domain.model.WorkOrder;
 import com.avery.bikemaintenance.application.port.outbound.MaintenanceIssueRepository;
 import com.avery.bikemaintenance.domain.model.MaintenanceIssue;
 
-
 @Service
 public class WorkOrderService {
 
-    private final WorkOrderRepository workOrderRepository;
-    private final BikeRepository bikeRepository;
-    private final MaintenanceIssueRepository issueRepository;
-    
-    public WorkOrderService(
-            WorkOrderRepository workOrderRepository,
-            BikeRepository bikeRepository,
-            MaintenanceIssueRepository issueRepository) {
+	private final WorkOrderRepository workOrderRepository;
+	private final BikeRepository bikeRepository;
+	private final MaintenanceIssueRepository issueRepository;
 
-        this.workOrderRepository = workOrderRepository;
-        this.bikeRepository = bikeRepository;
-        this.issueRepository = issueRepository;
-    }
+	public WorkOrderService(WorkOrderRepository workOrderRepository, BikeRepository bikeRepository,
+			MaintenanceIssueRepository issueRepository) {
 
-    public WorkOrder createWorkOrder(
-            String workOrderId,
-            String bikeId,
-            String maintenanceIssueId,
-            String description,
-            String assignedTechnician) {
+		this.workOrderRepository = workOrderRepository;
+		this.bikeRepository = bikeRepository;
+		this.issueRepository = issueRepository;
+	}
 
-        if (!bikeRepository.existsById(bikeId)) {
-            throw new IllegalArgumentException(
-                    "Bike does not exist: " + bikeId);
-        }
+	public WorkOrder createWorkOrder(String bikeId, String maintenanceIssueId, String description,
+			String assignedTechnicianId) {
 
-        MaintenanceIssue issue = issueRepository
-                .findById(maintenanceIssueId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Maintenance issue does not exist: "
-                                        + maintenanceIssueId));
+		String workOrderId = UUID.randomUUID().toString();
 
-        if (!issue.getBikeId().equals(bikeId)) {
-            throw new IllegalArgumentException(
-                    "Maintenance issue does not belong to bike: "
-                            + bikeId);
-        }
+		if (!bikeRepository.existsById(bikeId)) {
+			throw new IllegalArgumentException("Bike does not exist: " + bikeId);
+		}
 
-        if (workOrderRepository.existsById(workOrderId)) {
-            throw new IllegalArgumentException(
-                    "Work order already exists: " + workOrderId);
-        }
+		MaintenanceIssue issue = issueRepository.findById(maintenanceIssueId).orElseThrow(
+				() -> new IllegalArgumentException("Maintenance issue does not exist: " + maintenanceIssueId));
 
-        String status =
-                assignedTechnician == null
-                        || assignedTechnician.isBlank()
-                        ? "OPEN"
-                        : "ASSIGNED";
+		if (!issue.getBikeId().equals(bikeId)) {
+			throw new IllegalArgumentException("Maintenance issue does not belong to bike: " + bikeId);
+		}
 
-        WorkOrder workOrder = new WorkOrder(
-                workOrderId,
-                bikeId,
-                maintenanceIssueId,
-                description,
-                assignedTechnician,
-                status,
-                LocalDate.now());
 
-        WorkOrder savedWorkOrder =
-                workOrderRepository.save(workOrder);
+		String status = assignedTechnicianId == null || assignedTechnicianId.isBlank() ? "OPEN" : "ASSIGNED";
 
-        issue.markWorkOrderCreated();
-        issueRepository.save(issue);
+		WorkOrder workOrder = new WorkOrder(
+		        workOrderId,
+		        bikeId,
+		        maintenanceIssueId,
+		        description,
+		        assignedTechnicianId,
+		        status,
+		        LocalDate.now()
+		);
 
-        return savedWorkOrder;
-    }
+		WorkOrder savedWorkOrder = workOrderRepository.save(workOrder);
 
-    public Optional<WorkOrder> findById(
-            String workOrderId) {
+		issue.markWorkOrderCreated();
+		issueRepository.save(issue);
 
-        return workOrderRepository.findById(workOrderId);
-    }
+		return savedWorkOrder;
+	}
 
-    public List<WorkOrder> findAll() {
-        return workOrderRepository.findAll();
-    }
+	public Optional<WorkOrder> findById(String workOrderId) {
 
-    public List<WorkOrder> findByBikeId(String bikeId) {
-        return workOrderRepository.findByBikeId(bikeId);
-    }
+		return workOrderRepository.findById(workOrderId);
+	}
 
-    public WorkOrder startWork(String workOrderId) {
-        WorkOrder workOrder = requireWorkOrder(workOrderId);
-        workOrder.startWork();
+	public List<WorkOrder> findAll() {
+		return workOrderRepository.findAll();
+	}
+	
+	public List<WorkOrder> findByAssignedTechnicianId(
+	        String assignedTechnicianId) {
 
-        return workOrderRepository.save(workOrder);
-    }
+	    if (assignedTechnicianId == null
+	            || assignedTechnicianId.isBlank()) {
 
-    public WorkOrder closeWorkOrder(String workOrderId) {
-        WorkOrder workOrder = requireWorkOrder(workOrderId);
-        workOrder.close();
+	        throw new IllegalArgumentException(
+	                "Technician ID is required.");
+	    }
 
-        return workOrderRepository.save(workOrder);
-    }
+	    return workOrderRepository
+	            .findByAssignedTechnicianId(
+	                    assignedTechnicianId);
+	}
 
-    private WorkOrder requireWorkOrder(
-            String workOrderId) {
+	public List<WorkOrder> findByBikeId(String bikeId) {
+		return workOrderRepository.findByBikeId(bikeId);
+	}
 
-        return workOrderRepository.findById(workOrderId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Work order does not exist: "
-                                        + workOrderId
-                        )
-                );
-    }
+	public WorkOrder startWork(
+	        String workOrderId,
+	        String authenticatedUserId,
+	        String authenticatedRole) {
+
+	    WorkOrder workOrder = findAuthorizedWorkOrder(
+	            workOrderId,
+	            authenticatedUserId,
+	            authenticatedRole);
+
+	    Bike bike = bikeRepository
+	            .findById(workOrder.getBikeId())
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException(
+	                            "Bike does not exist: "
+	                                    + workOrder.getBikeId()));
+
+	    workOrder.startWork();
+	    bike.startRepair();
+
+	    bikeRepository.save(bike);
+
+	    return workOrderRepository.save(workOrder);
+	}
+
+	public WorkOrder closeWorkOrder(
+	        String workOrderId,
+	        String authenticatedUserId,
+	        String authenticatedRole) {
+
+	    WorkOrder workOrder = findAuthorizedWorkOrder(
+	            workOrderId,
+	            authenticatedUserId,
+	            authenticatedRole);
+
+	    workOrder.close();
+
+	    return workOrderRepository.save(workOrder);
+	}
+
+	private WorkOrder requireWorkOrder(String workOrderId) {
+
+		return workOrderRepository.findById(workOrderId)
+				.orElseThrow(() -> new IllegalArgumentException("Work order does not exist: " + workOrderId));
+
+	}
+	
+	private WorkOrder findAuthorizedWorkOrder(
+	        String workOrderId,
+	        String authenticatedUserId,
+	        String authenticatedRole) {
+
+	    WorkOrder workOrder = workOrderRepository
+	            .findById(workOrderId)
+	            .orElseThrow(() ->
+	                    new IllegalArgumentException(
+	                            "Work order does not exist: "
+	                                    + workOrderId));
+
+	    if ("ADMIN".equals(authenticatedRole)) {
+	        return workOrder;
+	    }
+
+	    boolean assignedToTechnician =
+	            "TECHNICIAN".equals(authenticatedRole)
+	            && authenticatedUserId != null
+	            && authenticatedUserId.equals(
+	                    workOrder.getAssignedTechnicianId());
+
+	    if (!assignedToTechnician) {
+	        throw new AccessDeniedException(
+	                "You are not assigned to this work order.");
+	    }
+
+	    return workOrder;
+	}
 }

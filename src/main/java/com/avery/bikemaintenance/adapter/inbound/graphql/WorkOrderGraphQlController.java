@@ -1,6 +1,8 @@
 package com.avery.bikemaintenance.adapter.inbound.graphql;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import java.util.List;
 
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -26,6 +28,20 @@ public class WorkOrderGraphQlController {
     public List<WorkOrder> workOrders() {
         return workOrderService.findAll();
     }
+    
+    @PreAuthorize("hasRole('TECHNICIAN')")
+    @QueryMapping
+    public List<WorkOrder> myWorkOrders(
+            @AuthenticationPrincipal Jwt jwt) {
+
+        String technicianId =
+                jwt.getClaimAsString("userId");
+
+        return workOrderService
+                .findByAssignedTechnicianId(
+                        technicianId);
+    }
+    
 
     @QueryMapping
     public WorkOrder workOrderById(
@@ -48,27 +64,46 @@ public class WorkOrderGraphQlController {
             @Argument WorkOrderInput input) {
 
     	return workOrderService.createWorkOrder(
-    	        input.workOrderId(),
     	        input.bikeId(),
     	        input.maintenanceIssueId(),
     	        input.description(),
-    	        input.assignedTechnician());
+    	        input.assignedTechnicianId());
     }
 
     
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     @MutationMapping
     public WorkOrder startWork(
-            @Argument String workOrderId) {
+            @Argument String workOrderId,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        return workOrderService.startWork(workOrderId);
+        String authenticatedUserId =
+                jwt.getClaimAsString("userId");
+
+        String authenticatedRole =
+                jwt.getClaimAsString("role");
+
+        return workOrderService.startWork(
+                workOrderId,
+                authenticatedUserId,
+                authenticatedRole);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'TECHNICIAN')")
     @MutationMapping
     public WorkOrder closeWorkOrder(
-            @Argument String workOrderId) {
+            @Argument String workOrderId,
+            @AuthenticationPrincipal Jwt jwt) {
 
-        return workOrderService.closeWorkOrder(workOrderId);
+        String authenticatedUserId =
+                jwt.getClaimAsString("userId");
+
+        String authenticatedRole =
+                jwt.getClaimAsString("role");
+
+        return workOrderService.closeWorkOrder(
+                workOrderId,
+                authenticatedUserId,
+                authenticatedRole);
     }
 }

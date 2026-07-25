@@ -47,6 +47,13 @@ public class DevelopmentUserAccountInitializer
                 "Jordan Lee",
                 "Tech12345!",
                 UserRole.TECHNICIAN);
+        
+        seedAccount(
+                "USER-1001",
+                "user@example.com",
+                "Test User",
+                "User12345!",
+                UserRole.USER);
 
         System.out.println(
                 "Development user accounts initialized.");

@@ -1,69 +1,52 @@
-const GRAPHQL_URL = "/graphql";
+import { graphqlRequest } from "./graphqlClient";
 
-async function executeGraphQl(query, variables = {}) {
-  const response = await fetch(GRAPHQL_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `GraphQL request failed with status ${response.status}`
-    );
-  }
-
-  const result = await response.json();
-
-  if (result.errors?.length) {
-    throw new Error(
-      result.errors
-        .map((error) => error.message)
-        .join(", ")
-    );
-  }
-
-  return result.data;
-}
+const workOrderFields = `
+  workOrderId
+  bikeId
+  maintenanceIssueId
+  description
+  assignedTechnicianId
+  status
+`;
 
 export async function getWorkOrders() {
   const query = `
     query GetWorkOrders {
       workOrders {
-        workOrderId
-        bikeId
-        maintenanceIssueId
-        description
-        assignedTechnician
-        status
+        ${workOrderFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(query);
+  const data = await graphqlRequest(query);
 
   return data.workOrders;
 }
+
+export async function getMyWorkOrders() {
+    const query = `
+        query GetMyWorkOrders {
+            myWorkOrders {
+                ${workOrderFields}
+            }
+        }
+    `;
+
+    const data = await graphqlRequest(query);
+
+    return data.myWorkOrders;
+}
+
 export async function createWorkOrder(input) {
   const mutation = `
     mutation CreateWorkOrder($input: WorkOrderInput!) {
       createWorkOrder(input: $input) {
-        workOrderId
-        bikeId
-        maintenanceIssueId
-        description
-        assignedTechnician
-        status
+        ${workOrderFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
+  const data = await graphqlRequest(mutation, {
     input,
   });
 
@@ -74,17 +57,12 @@ export async function startWork(workOrderId) {
   const mutation = `
     mutation StartWork($workOrderId: ID!) {
       startWork(workOrderId: $workOrderId) {
-		workOrderId
-		bikeId
-		maintenanceIssueId
-		description
-		assignedTechnician
-		status
+        ${workOrderFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
+  const data = await graphqlRequest(mutation, {
     workOrderId,
   });
 
@@ -95,17 +73,12 @@ export async function closeWorkOrder(workOrderId) {
   const mutation = `
     mutation CloseWorkOrder($workOrderId: ID!) {
       closeWorkOrder(workOrderId: $workOrderId) {
-		workOrderId
-		bikeId
-		maintenanceIssueId
-		description
-		assignedTechnician
-		status
+        ${workOrderFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
+  const data = await graphqlRequest(mutation, {
     workOrderId,
   });
 

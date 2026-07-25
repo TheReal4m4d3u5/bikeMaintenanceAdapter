@@ -33,15 +33,26 @@ public class BikeGraphQlController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @MutationMapping
-    public Bike saveBike(@Argument BikeInput input) {
-        Bike bike = new Bike(
-            input.bikeId(),
-            input.model(),
-            input.condition(),
-            input.rideCount(),
-            input.mileage()
-        );
+    public Bike createBike(
+            @Argument CreateBikeInput input) {
 
-        return bikeService.saveBike(bike);
+        return bikeService.createBike(
+                input.model(),
+                input.condition(),
+                input.rideCount(),
+                input.mileage());
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @MutationMapping
+    public Bike updateBike(
+            @Argument BikeInput input) {
+
+        return bikeService.updateBike(
+                input.bikeId(),
+                input.model(),
+                input.condition(),
+                input.rideCount(),
+                input.mileage());
     }
 }

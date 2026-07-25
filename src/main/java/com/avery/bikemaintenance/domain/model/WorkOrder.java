@@ -7,7 +7,7 @@ public class WorkOrder {
     private final String workOrderId;
     private final String bikeId;
     private String description;
-    private String assignedTechnician;
+    private String assignedTechnicianId;
     private String status;
     private final LocalDate createdDate;
     private final String maintenanceIssueId;
@@ -17,7 +17,7 @@ public class WorkOrder {
             String bikeId,
             String maintenanceIssueId,
             String description,
-            String assignedTechnician,
+            String assignedTechnicianId,
             String status,
             LocalDate createdDate) {
 
@@ -41,7 +41,7 @@ public class WorkOrder {
         this.bikeId = bikeId;
         this.maintenanceIssueId = maintenanceIssueId;
         this.description = description;
-        this.assignedTechnician = assignedTechnician;
+        this.assignedTechnicianId = assignedTechnicianId;
         this.status = status;
         this.createdDate = createdDate;
     }
@@ -62,9 +62,13 @@ public class WorkOrder {
     public String getDescription() {
         return description;
     }
+    
+    public String getAssignedTechnicianId() {
+        return assignedTechnicianId;
+    }
 
     public String getAssignedTechnician() {
-        return assignedTechnician;
+        return assignedTechnicianId;
     }
 
     public String getStatus() {
@@ -75,15 +79,15 @@ public class WorkOrder {
         return createdDate;
     }
 
-    public void assignTechnician(String assignedTechnician) {
-        if (assignedTechnician == null ||
-                assignedTechnician.isBlank()) {
+    public void assignTechnician(String assignedTechnicianId) {
+        if (assignedTechnicianId == null ||
+        		assignedTechnicianId.isBlank()) {
 
             throw new IllegalArgumentException(
                     "Technician is required.");
         }
 
-        this.assignedTechnician = assignedTechnician;
+        this.assignedTechnicianId = assignedTechnicianId;
         this.status = "ASSIGNED";
     }
 

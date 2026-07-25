@@ -1,101 +1,81 @@
-const GRAPHQL_URL = "/graphql";
+import { graphqlRequest } from "./graphqlClient";
 
-async function executeGraphQl(query, variables = {}) {
-  const response = await fetch(GRAPHQL_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error(
-      `GraphQL request failed with status ${response.status}`
-    );
-  }
-
-  const result = await response.json();
-
-  if (result.errors?.length) {
-    throw new Error(
-      result.errors
-        .map((error) => error.message)
-        .join(", ")
-    );
-  }
-
-  return result.data;
-}
+const maintenanceIssueFields = `
+	maintenanceIssueId
+	bikeId
+	reportedByUserId
+	sourceType
+	description
+	severity
+	status
+`;
 
 export async function getMaintenanceIssues() {
-  const query = `
+    const query = `
     query GetMaintenanceIssues {
       maintenanceIssues {
-        maintenanceIssueId
-        bikeId
-        sourceType
-        description
-        severity
-        status
+        ${maintenanceIssueFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(query);
+    const data = await graphqlRequest(query);
 
-  return data.maintenanceIssues;
+    return data.maintenanceIssues;
 }
 
+export async function getMyMaintenanceIssues() {
+    const query = `
+        query GetMyMaintenanceIssues {
+            myMaintenanceIssues {
+                ${maintenanceIssueFields}
+            }
+        }
+    `;
+
+    const data = await graphqlRequest(query);
+
+    return data.myMaintenanceIssues;
+}
+
+
+
 export async function createMaintenanceIssue(input) {
-  const mutation = `
+    const mutation = `
     mutation CreateMaintenanceIssue(
       $input: MaintenanceIssueInput!
     ) {
       createMaintenanceIssue(input: $input) {
-        maintenanceIssueId
-        bikeId
-        sourceType
-        description
-        severity
-        status
+        ${maintenanceIssueFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
-    input,
-  });
+    const data = await graphqlRequest(mutation, {
+        input,
+    });
 
-  return data.createMaintenanceIssue;
+    return data.createMaintenanceIssue;
 }
 
 export async function resolveMaintenanceIssue(
-  maintenanceIssueId
+    maintenanceIssueId
 ) {
-  const mutation = `
+    const mutation = `
     mutation ResolveMaintenanceIssue(
       $maintenanceIssueId: ID!
     ) {
       resolveMaintenanceIssue(
         maintenanceIssueId: $maintenanceIssueId
       ) {
-        maintenanceIssueId
-        bikeId
-        sourceType
-        description
-        severity
-        status
+        ${maintenanceIssueFields}
       }
     }
   `;
 
-  const data = await executeGraphQl(mutation, {
-    maintenanceIssueId,
-  });
+    const data = await graphqlRequest(mutation, {
+        maintenanceIssueId,
+    });
 
-  return data.resolveMaintenanceIssue;
+    return data.resolveMaintenanceIssue;
 }

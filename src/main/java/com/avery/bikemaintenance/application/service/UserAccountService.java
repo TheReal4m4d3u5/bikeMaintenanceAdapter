@@ -77,6 +77,11 @@ public class UserAccountService {
     public List<UserAccount> findAll() {
         return userAccountRepository.findAll();
     }
+    
+    public List<UserAccount> findTechnicians() {
+        return userAccountRepository.findByRole(
+                UserRole.TECHNICIAN);
+    }
 
     private void validateRegistration(
             String email,

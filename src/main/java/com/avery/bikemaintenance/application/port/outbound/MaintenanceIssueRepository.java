@@ -14,6 +14,9 @@ public interface MaintenanceIssueRepository {
 
     List<MaintenanceIssue> findByBikeId(String bikeId);
 
+    List<MaintenanceIssue> findByReportedByUserId(
+            String reportedByUserId);
+    
     MaintenanceIssue save(MaintenanceIssue issue);
 
     boolean existsById(String maintenanceIssueId);
