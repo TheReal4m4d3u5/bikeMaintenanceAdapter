@@ -1,0 +1,64 @@
+package com.avery.bikemaintenance.adapter.inbound.graphql;
+
+import java.util.List;
+
+import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.stereotype.Controller;
+
+import com.avery.bikemaintenance.application.service.MaintenanceIssueService;
+import com.avery.bikemaintenance.domain.model.MaintenanceIssue;
+
+@Controller
+public class MaintenanceIssueGraphQlController {
+
+    private final MaintenanceIssueService maintenanceIssueService;
+
+    public MaintenanceIssueGraphQlController(
+            MaintenanceIssueService maintenanceIssueService) {
+
+        this.maintenanceIssueService = maintenanceIssueService;
+    }
+
+    @QueryMapping
+    public List<MaintenanceIssue> maintenanceIssues() {
+        return maintenanceIssueService.findAll();
+    }
+
+    @QueryMapping
+    public MaintenanceIssue maintenanceIssueById(
+            @Argument String maintenanceIssueId) {
+
+        return maintenanceIssueService
+                .findById(maintenanceIssueId)
+                .orElse(null);
+    }
+
+    @QueryMapping
+    public List<MaintenanceIssue> maintenanceIssuesByBikeId(
+            @Argument String bikeId) {
+
+        return maintenanceIssueService.findByBikeId(bikeId);
+    }
+
+    @MutationMapping
+    public MaintenanceIssue createMaintenanceIssue(
+            @Argument MaintenanceIssueInput input) {
+
+        return maintenanceIssueService.createIssue(
+                input.maintenanceIssueId(),
+                input.bikeId(),
+                input.sourceType(),
+                input.description(),
+                input.severity());
+    }
+
+    @MutationMapping
+    public MaintenanceIssue resolveMaintenanceIssue(
+            @Argument String maintenanceIssueId) {
+
+        return maintenanceIssueService.resolveIssue(
+                maintenanceIssueId);
+    }
+}

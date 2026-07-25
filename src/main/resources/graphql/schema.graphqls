@@ -1,0 +1,87 @@
+type Query {
+    bikes: [Bike!]!
+    bikeById(bikeId: ID!): Bike
+
+    maintenanceIssues: [MaintenanceIssue!]!
+    maintenanceIssueById(
+        maintenanceIssueId: ID!
+    ): MaintenanceIssue
+    maintenanceIssuesByBikeId(
+        bikeId: ID!
+    ): [MaintenanceIssue!]!
+
+    workOrders: [WorkOrder!]!
+    workOrderById(workOrderId: ID!): WorkOrder
+    workOrdersByBikeId(bikeId: ID!): [WorkOrder!]!
+}
+
+type Mutation {
+    saveBike(input: BikeInput!): Bike!
+
+    createMaintenanceIssue(
+        input: MaintenanceIssueInput!
+    ): MaintenanceIssue!
+    resolveMaintenanceIssue(
+        maintenanceIssueId: ID!
+    ): MaintenanceIssue!
+
+    createWorkOrder(
+        input: WorkOrderInput!
+    ): WorkOrder!
+    startWork(workOrderId: ID!): WorkOrder!
+    closeWorkOrder(workOrderId: ID!): WorkOrder!
+}
+
+type Bike {
+    bikeId: ID!
+    model: String!
+    condition: String!
+    rideCount: Int!
+    mileage: Float!
+}
+
+type MaintenanceIssue {
+    maintenanceIssueId: ID!
+    bikeId: ID!
+    sourceType: String!
+    description: String!
+    severity: String!
+    status: String!
+}
+
+
+
+
+
+input BikeInput {
+    bikeId: ID!
+    model: String!
+    condition: String!
+    rideCount: Int!
+    mileage: Float!
+}
+
+input MaintenanceIssueInput {
+    maintenanceIssueId: ID!
+    bikeId: ID!
+    sourceType: String!
+    description: String!
+    severity: String!
+}
+
+type WorkOrder {
+    workOrderId: ID!
+    bikeId: ID!
+    maintenanceIssueId: ID!
+    description: String!
+    assignedTechnician: String
+    status: String!
+}
+
+input WorkOrderInput {
+    workOrderId: ID!
+    bikeId: ID!
+    maintenanceIssueId: ID!
+    description: String!
+    assignedTechnician: String
+}

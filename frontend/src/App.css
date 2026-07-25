@@ -1,0 +1,286 @@
+.app {
+  min-height: 100vh;
+  padding: 48px 24px;
+  background: #eef2f7;
+  color: #172033;
+}
+
+.page-header {
+  width: min(1180px, 100%);
+  margin: 0 auto 32px;
+}
+
+.page-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #111827;
+  font-size: 3rem;
+}
+
+.subtitle {
+  margin: 12px 0 0;
+  color: #64748b;
+}
+
+.repository-badge {
+  padding: 10px 16px;
+  border: 1px solid #bfdbfe;
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  gap: 24px;
+  align-items: start;
+}
+
+.panel {
+  padding: 26px;
+  border: 1px solid #dbe2ea;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.panel-description {
+  margin: 7px 0 0;
+  color: #64748b;
+}
+
+.bike-form {
+  display: grid;
+  gap: 17px;
+}
+
+.bike-form label {
+  display: grid;
+  gap: 7px;
+  font-weight: 700;
+}
+
+.bike-form input,
+.bike-form select {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.primary-button {
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 9px;
+  background: #2563eb;
+  color: white;
+  font-weight: 800;
+}
+
+.secondary-button {
+  padding: 9px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+  font-weight: 700;
+}
+
+.empty-state {
+  padding: 48px 20px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  color: #64748b;
+  text-align: center;
+}
+
+.bike-list {
+  display: grid;
+  gap: 14px;
+}
+
+.bike-card {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.bike-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.bike-card h3 {
+  margin: 0;
+}
+
+.bike-card-model {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.condition-badge {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+
+.work-order-section {
+  display: grid;
+  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+  width: min(1180px, 100%);
+  margin: 24px auto 0;
+  gap: 24px;
+  align-items: start;
+}
+
+.bike-form textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 11px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  font: inherit;
+  resize: vertical;
+}
+
+.bike-form textarea:focus {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.15);
+}
+
+.work-order-list {
+  display: grid;
+  gap: 14px;
+}
+
+.work-order-card {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.work-order-card h3 {
+  margin: 0;
+}
+
+.work-order-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+@media (max-width: 850px) {
+  .work-order-section {
+    grid-template-columns: 1fr;
+  }
+}
+
+.bike-metrics {
+  display: flex;
+  gap: 36px;
+  margin-top: 20px;
+}
+
+.bike-metrics dd {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+@media (max-width: 850px) {
+  .page-header-content {
+    flex-direction: column;
+  }
+
+  .dashboard {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+.maintenance-issue-section {
+  display: grid;
+  grid-template-columns: minmax(320px, 400px) minmax(0, 1fr);
+  width: min(1180px, 100%);
+  margin: 24px auto 0;
+  gap: 24px;
+  align-items: start;
+}
+
+.maintenance-issue-list {
+  display: grid;
+  gap: 14px;
+}
+
+.maintenance-issue-card {
+  padding: 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.maintenance-issue-card h3 {
+  margin: 0;
+}
+
+.issue-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+}
+
+.issue-details p {
+  margin: 0 0 14px;
+}
+
+@media (max-width: 850px) {
+  .maintenance-issue-section {
+    grid-template-columns: 1fr;
+  }
+}
