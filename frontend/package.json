@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "bdd": "cucumber-js --config cucumber.cjs",
-    "bdd:smoke": "cucumber-js --config cucumber.cjs --tags @smoke"
+    "bdd:smoke": "cucumber-js --config cucumber.cjs --tags \"@smoke and not @graphql-provider\"",
+    "bdd:smoke:graphql": "cucumber-js --config cucumber.cjs --tags \"@smoke and @graphql-provider\""
   },
   "dependencies": {
     "react": "^19.2.7",

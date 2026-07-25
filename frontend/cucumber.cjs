@@ -11,7 +11,7 @@ module.exports = {
 
         format: [
             "progress",
-            "html:e2e/reports/cucumber-report.html",
+            "html:../test-reports/cucumber-report.html",
         ],
 
         parallel: 1,
